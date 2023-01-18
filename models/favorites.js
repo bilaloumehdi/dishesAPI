@@ -1,4 +1,3 @@
-const { Timestamp } = require('mongodb');
 const mongoose = require('mongoose');
 
 const favoritesSchema = mongoose.Schema({
@@ -11,7 +10,7 @@ const favoritesSchema = mongoose.Schema({
         ref:'dishes'
     }
 },{
-        timestamps: true
+    timestamps: true
 })
 
 module.exports = mongoose.model('favorites',favoritesSchema)
