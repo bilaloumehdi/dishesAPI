@@ -18,7 +18,7 @@ favoritesRouter.route('/')
             })
     }).post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
         // if the user has already favorites 
-        const dishArray = req.body;
+        const dishArray = [...req.body];
 
         if (dishArray.length == 0) {
             return res.status(200).json({ success: true, status: 'there is no dishes to add' })
@@ -27,32 +27,32 @@ favoritesRouter.route('/')
             .then((favorites) => {
 
                 if (favorites) {
+                    //dish does exist ?
                     dishArray.forEach(dish => {
-                        //dish does exist ? 
+                    
                         const doesDishExists = favorites.dishes.indexOf(dish._id);
-
                         if (doesDishExists !== -1) {
                             err = new Error(`Dish  ${dish._id} already exists`);
                             err.status = 400;
                             return next(err);
                         }
                         Dish.findById(dish._id)
-                            .then(dishe => {
-                                if (dishe) {
-                                    favorites.dishes.push(dish._id).save();
-                                } else {
+                            .then(dish => {
+                                if (!dish) {                    
                                     return res.status(404).json({ success: false, status: 'One of the dishes does not exist' })
                                 }
                             }).catch(error => {
                                 return res.status(404).json({ success: false, status: 'One of the dishes does not exist' })
+
                             })
                     })
+                    favorites.dishes.push(...dishArray);
                     favorites.save()
                         .then(favorite => {
                             Favorites.findOne({ user: favorite.user })
                                 .then(favorites => {
                                     return res.status(200).json(favorites);
-                            })
+                                })
                         }).catch((error) => {
                             res.status(500).json({ success: false, status: 'there is an error, please try again' })
                         })
@@ -62,14 +62,13 @@ favoritesRouter.route('/')
                     favorites.user = req.user._id;
                     dishArray.forEach(dish => {
                         Dish.findById(dish._id)
-                            .then(dishe => {
-                                if (dishe) {
-                                    favorites.dishes.push(dish._id).save();
-                                } else {
+                            .then(dish => {
+                                if (!dish) {
                                     return res.status(404).json({ success: true, status: 'one of dishes does not exist' });
                                 }
                             })
                     })
+                    favorites.dishes.push(...dishArray);
                     favorites.save()
                         .then(favorite => {
                             Favorites.findOne({ user: favorite.user })
