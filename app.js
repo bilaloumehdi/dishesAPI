@@ -9,6 +9,7 @@ const dishRouter = require('./routers/dishRouter');
 const promoRouter = require('./routers/promoRouter');
 const leaderRouter = require('./routers/leaderRouter');
 const userRouter = require('./routers/userRouter') ;
+const favoritesRouter = require('./routers/favoritesRouter');
 const uploadRouter = require('./routers/uploadRouter');
 
 const app = express();
@@ -57,8 +58,8 @@ app.use('/users', userRouter) ;
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leaderRouter);
+app.use('/favorites', favoritesRouter);
 app.use('/imageUpload', uploadRouter);
-
 
 mongoose.connect(url)
 .then(() => {
