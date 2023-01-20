@@ -25,27 +25,30 @@ favoritesRouter.route('/')
         }
         Favorites.findOne({ user: req.user._id })
             .then((favorites) => {
-
+                let doesDishExists ;
+                let dishNotFound = false ;
                 if (favorites) {
                     //dish does exist ?
                     dishArray.forEach(dish => {
                     
-                        const doesDishExists = favorites.dishes.indexOf(dish._id);
+                        doesDishExists = favorites.dishes.indexOf(dish._id);
                         if (doesDishExists !== -1) {
-                            err = new Error(`Dish  ${dish._id} already exists`);
-                            err.status = 400;
-                            return next(err);
+                            return;
                         }
                         Dish.findById(dish._id)
                             .then(dish => {
-                                if (!dish) {                    
-                                    return res.status(404).json({ success: false, status: 'One of the dishes does not exist' })
+                                if (!dish) {      
+                                    dishNotFound =true ;              
+                                    return ;
                                 }
-                            }).catch(error => {
-                                return res.status(404).json({ success: false, status: 'One of the dishes does not exist' })
-
                             })
                     })
+                    if (doesDishExists !== -1) {
+                        return res.status(400).json({ success: false, status: `Dish(s) already exists` })
+                    }
+                    if (dishNotFound){
+                        return res.status(404).json({ success: false, status: 'One of the dishes does not exist' })
+                    }
                     favorites.dishes.push(...dishArray);
                     favorites.save()
                         .then(favorite => {
@@ -53,8 +56,8 @@ favoritesRouter.route('/')
                                 .then(favorites => {
                                     return res.status(200).json(favorites);
                                 })
-                        }).catch((error) => {
-                            res.status(500).json({ success: false, status: 'there is an error, please try again' })
+                        }).catch(err => {
+                            next(err)
                         })
                 } // the user does not have any favorites yet 
                 else {
@@ -93,8 +96,8 @@ favoritesRouter.route('/')
                 return next(err);
             })
     })
-favoritesRouter.route('/:dishId').
-    post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+favoritesRouter.route('/:dishId')
+    .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
         // verify if the dish exists
         Dish.findById(req.params.dishId)
             .then(dish => {
@@ -106,9 +109,6 @@ favoritesRouter.route('/:dishId').
                 // verify if the dish is already in the user favorites
                 Favorites.findOne({ user: req.user._id })
                     .then(favorites => {
-
-                        //const userFavorites = favorites.find(favorite => favorite.user.equals(req.user._id));
-                        // user has alredy favorites
                         if (favorites) {
                             const doesDishExists = favorites.dishes.indexOf(req.params.dishId);
 
@@ -145,6 +145,15 @@ favoritesRouter.route('/:dishId').
                         }
                     })
             })
+    }).delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+        Favorites.findOne({user: req.user._id})
+        .then(favorites => {
+            favorites.dishes.remove(req.params.dishId);
+            favorites.save()
+                .then(favorites => {
+                    return res.status(200).json({ success: true, status: favorites })
+                })
+        })
     })
 
 
