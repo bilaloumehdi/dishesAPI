@@ -2,8 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose') ;
 const passport = require('passport')
 const session = require('express-session') 
-// const FileStore = require('session-file-store')(session)
 const authenticate = require('./authenticate');
+
 // routers
 const dishRouter = require('./routers/dishRouter');
 const promoRouter = require('./routers/promoRouter');
@@ -31,30 +31,10 @@ const url  = require('./config').Mongo_URL ;
 app.use(express.json())
 app.use(express.urlencoded({extended: true})) ;
 app.use(express.static('./public'))
-// app.use(session({
-//     name:"session-id",
-//     secret:'79262EJOA7730' ,
-//     resave:false, 
-//     saveUninitialized:false,
-//     store: new FileStore(),
-//     // cookie:{secure: true} ,// cookie(session-id) --> will be hiden
-
-// }));
 
 app.use(passport.initialize());
-// app.use(passport.session());
-
-// function auth(req,res,next){
-//     console.log(req.user)
-//     if(!req.user){
-//         const err = new Error('You are not authenticated'); 
-//         next(err);
-//     }
-//         next()
-// }
 
 app.use('/users', userRouter) ;
-// app.use(auth);
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leaderRouter);
