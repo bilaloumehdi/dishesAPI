@@ -145,7 +145,11 @@ favoritesRouter.route('/:dishId')
                         }
                     })
             })
-    }).delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    }).put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+        res.statusCode = 403;
+        res.end('PUT operation not supported on /favorites/' + req.params.dishId);
+    })
+    .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
         Favorites.findOne({user: req.user._id})
         .then(favorites => {
             favorites.dishes.remove(req.params.dishId);
