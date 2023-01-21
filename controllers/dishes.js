@@ -32,7 +32,7 @@ const deleteDishes = (req, res, next) => {
 
 const getDish = (req, res, next) => {
     Dish.findById(req.params.dishId)
-        .populate('comments.author')
+        .populate("comments.author")
         .then(dish => {
             res.status(200).json(dish)
         })
